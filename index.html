@@ -1,350 +1,289 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Boss Respawn Timer</title>
+    <title>Boss Spawn Tracker</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<script src="https://cdn.jsdelivr.net/npm/lz-string/libs/lz-string.min.js"></script>
-
     <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --success: #4cc9f0;
+            --warning: #f72585;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+
+        .dark-mode {
+            --primary: #4cc9f0;
+            --secondary: #4361ee;
+            --light: #2b2d42;
+            --dark: #f8f9fa;
+            --card-bg: #1e1e2e;
+            --text-color: #f8f9fa;
+            --shadow: rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
         body {
-            background: #f0f0f0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light);
+            color: var(--text-color);
+            line-height: 1.6;
             padding: 20px;
-            color: #202124;
-            font-family: Segoe UI, Roboto, Arial, sans-serif
         }
 
         .container {
             max-width: 1200px;
-            margin: auto;
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, .1);
-            padding: 20px
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--primary);
         }
 
         h1 {
-            color: #1a73e8;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #dadce0;
-            display: flex;
-            align-items: center;
-            gap: 10px
+            font-size: 2.2rem;
+            color: var(--primary);
         }
 
-        .instructions,
-        .sharing-options {
-            padding: 15px;
-            border-radius: 6px;
-            margin-bottom: 20px
-        }
-
-        .instructions {
-            background: #e8f0fe
-        }
-
-        .sharing-options {
-            background: #e6f4ea
-        }
-
-        .instructions h3,
-        .sharing-options h3 {
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 8px
-        }
-
-        .instructions h3 {
-            color: #1a73e8
-        }
-
-        .sharing-options h3 {
-            color: #0b8043
-        }
-
-        .sharing-buttons {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-top: 15px
-        }
-
-        .share-btn {
-            background: #1a73e8;
-            color: #fff;
+        .theme-toggle {
+            background: none;
             border: none;
-            padding: 10px 15px;
-            border-radius: 4px;
             cursor: pointer;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 5px
+            font-size: 1.5rem;
+            color: var(--primary);
         }
 
-        .share-btn:hover {
-            background: #1565c0
-        }
-
-        .share-link {
-            display: flex;
-            margin-top: 10px
-        }
-
-        .share-link input {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid #dadce0;
-            border-radius: 4px 0 0 4px;
-            font-size: 14px
-        }
-
-        .copy-btn {
-            background: #0b8043;
-            color: #fff;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 0 4px 4px 0;
-            cursor: pointer
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px
-        }
-
-        th,
-        td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #dadce0
-        }
-
-        th {
-            background: #f8f9fa;
-            font-weight: 600;
-            position: sticky;
-            top: 0
-        }
-
-        tr:hover {
-            background: #f8f9fa
-        }
-
-        .boss-name {
-            font-weight: 600;
-            color: #1a73e8
-        }
-
-        .countdown {
-            font-weight: 600
-        }
-
-        .expired {
-            color: #d93025
-        }
-
-        .soon {
-            color: #f9ab00
-        }
-
-        .normal {
-            color: #0b8043
-        }
-
-        .form-container {
-            background: #f8f9fa;
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 8px 16px var(--shadow);
             padding: 20px;
-            border-radius: 6px;
-            margin-top: 20px
+            margin-bottom: 25px;
         }
 
-        .form-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 15px
-            
+        h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-size: 1.5rem;
         }
 
         .form-group {
-            flex: 1;
-            min-width: 100px
+            margin-bottom: 15px;
         }
 
         label {
             display: block;
-            margin-bottom: 5px;
-            font-weight: 600
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-color);
         }
 
-        input,
-        select {
+        select, input, button {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #dadce0;
-            border-radius: 4px;
-            font-size: 16px
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            background-color: var(--card-bg);
+            color: var(--text-color);
         }
 
         button {
-            background: #1a73e8;
-            color: #fff;
+            background-color: var(--primary);
+            color: white;
             border: none;
-            padding: 12px 20px;
-            border-radius: 4px;
             cursor: pointer;
-            font-size: 16px;
             font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px
+            transition: background-color 0.2s;
         }
 
         button:hover {
-            background: #1565c0
+            background-color: var(--secondary);
         }
 
-        .delete-btn {
-            background: #d93025;
-            padding: 8px 12px
+        .btn-delete {
+            background-color: var(--warning);
         }
 
-        .delete-btn:hover {
-            background: #b31412
+        .btn-delete:hover {
+            background-color: #c1121f;
         }
 
-        .reset-btn {
-            background: #f9ab00
+        .btn-export {
+            background-color: var(--success);
+            margin-right: 10px;
         }
 
-        .reset-btn:hover {
-            background: #e08e00
+        .btn-export:hover {
+            background-color: #2a9d8f;
         }
 
-        .export-btn {
-            background: #0b8043
+        .actions {
+            display: flex;
+            gap: 10px;
         }
 
-        .export-btn:hover {
-            background: #096b36
+        .actions button {
+            flex: 1;
         }
 
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: #5f6368
+        .boss-list {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
         }
 
-        .empty-state i {
-            font-size: 48px;
-            margin-bottom: 15px;
-            color: #dadce0
+        .boss-list th, .boss-list td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
         }
 
-        .notification {
+        .boss-list th {
+            background-color: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+
+        .boss-list tr:nth-child(even) {
+            background-color: rgba(67, 97, 238, 0.05);
+        }
+
+        .boss-list tr:hover {
+            background-color: rgba(67, 97, 238, 0.1);
+        }
+
+        .toast {
             position: fixed;
-            top: 20px;
+            bottom: 20px;
             right: 20px;
-            padding: 15px 20px;
-            border-radius: 6px;
-            background: #0b8043;
-            color: #fff;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, .1);
+            background-color: var(--success);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             display: flex;
             align-items: center;
-            gap: 10px;
-            transform: translateX(100%);
-            transition: .3s;
-            z-index: 1000
+            z-index: 1000;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: transform 0.3s, opacity 0.3s;
         }
 
-        .notification.show {
-            transform: translateX(0)
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
         }
 
-        .notification.error {
-            background: #d93025
+        .toast i {
+            margin-right: 10px;
+            font-size: 1.2rem;
         }
 
-        @media(max-width:768px) {
+        .import-export {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-label {
+            display: inline-block;
+            padding: 12px;
+            background-color: var(--gray);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            flex: 1;
+        }
+
+        .countdown {
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .notification-info {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: rgba(76, 201, 240, 0.1);
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .notification-info i {
+            color: var(--success);
+            margin-right: 8px;
+        }
+
+        /* Responsive design */
+        @media (min-width: 768px) {
             .form-row {
-                flex-direction: column
+                display: flex;
+                gap: 20px;
             }
-
-            .sharing-buttons {
-                flex-direction: column
+            
+            .form-row .form-group {
+                flex: 1;
             }
+        }
 
-            .share-btn,
-            button {
-                width: 100%;
-                justify-content: center
+        @media (max-width: 767px) {
+            header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .theme-toggle {
+                margin-top: 15px;
+            }
+            
+            .boss-list {
+                display: block;
+                overflow-x: auto;
+            }
+            
+            .import-export {
+                flex-direction: column;
             }
         }
     </style>
 </head>
-
 <body>
     <div class="container">
-        <h1><i class="fas fa-clock"></i> Boss Respawn Timer</h1>
+        <header>
+            <h1><i class="fas fa-dragon"></i> Boss Spawn Tracker LORDNINE: INFINITE CLASS </h1>
+            <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
+        </header>
 
-        <div class="instructions">
-            <h3><i class="fas fa-info-circle"></i> How to Use</h3>
-            <p>1. Select a boss or enter a custom name</p>
-            <p>2. Set respawn time (hours)</p>
-            <p>3. Enter death date & time</p>
-            <p>4. Click "Start Timer"</p>
-            <p>5. Timers auto-save in your browser</p>
-        </div>
-
-        <div class="sharing-options">
-            <h3><i class="fas fa-share-alt"></i> Share</h3>
-            <div class="sharing-buttons">
-                <button class="share-btn" id="shareLinkBtn"><i class="fas fa-link"></i> Copy Page Link</button>
-                <button class="share-btn" id="shareDataBtn"><i class="fas fa-code"></i> Export Data</button>
-            </div>
-            <div id="exportSection" style="display:none;margin-top:15px;">
-                <p>Copy this code to share:</p>
-                <div class="share-link">
-                    <input type="text" id="exportDataInput" readonly>
-                    <button class="copy-btn" id="copyExportBtn">Copy</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="sheet-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Boss</th>
-                        <th>Respawn</th>
-                        <th>Death</th>
-                        <th>Next Spawn</th>
-                        <th>Remaining</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="bossTableBody">
-                    <tr class="empty-state">
-                        <td colspan="6"><i class="fas fa-clock"></i>
-                            <p>No bosses tracked</p>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="form-container">
-            <div class="form-row">
+        <div class="card">
+            <h2>Add New Boss Kill</h2>
+            <form id="bossForm">
                 <div class="form-group">
-                    <label>Boss</label>
-                    <select id="bossName">
+                    <label for="bossName">Boss Name</label>
+                    <select id="bossName" required>
+                        <option value="">Select a boss</option>
                         <option value="VIORENT">VIORENT (10h)</option>
                         <option value="VENATUS">VENATUS (10h)</option>
                         <option value="EGO">EGO (21h)</option>
@@ -361,119 +300,324 @@
                         <option value="TITORE">TITORE (37h)</option>
                         <option value="LARBA">LARBA (35h)</option>
                         <option value="CATENA">CATENA (35h)</option>
-                        <option value="custom">Custom</option>
                     </select>
-                    <input type="text" id="customBossName" placeholder="Custom boss name"
-                        style="display:none;margin-top:10px;">
                 </div>
-                <div class="form-group">
-                    <label>Respawn (hours)</label>
-                    <input type="number" id="respawnTime" value="10" min="1">
-                </div>
-            </div>
 
-            <div class="form-row">
-                <div class="form-group"><label>Date of Death</label><input type="date" id="deathDate"></div>
-                <div class="form-group"><label>Time of Death</label><input type="time" id="deathTime"></div>
-            </div>
-             <button id="startTimer"><i class="fas fa-play"></i> Start Timer</button>
-            <div class="form-row">
-                      <div class="form-group" id="import-group">
-                    <label>Import Data</label>
-                    <input type="text" id="importDataInput" placeholder="Paste code">
-                    <button style="margin-top:10px;" id="importBtn"><i class="fas fa-file-import"></i> Import</button>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="dateSpawn">Date Spawn</label>
+                        <input type="date" id="dateSpawn" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="timeDeath">Time of Death</label>
+                        <input type="time" id="timeDeath" required>
+                    </div>
                 </div>
+
+                <div class="form-group">
+                    <label for="spawnTime">Spawn Time (hours)</label>
+                    <input type="number" id="spawnTime" min="1" placeholder="Enter spawn time in hours" required>
+                </div>
+
+                <button type="submit"><i class="fas fa-plus-circle"></i> Add Boss</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>Boss List</h2>
+            
+            <div class="notification-info">
+                <i class="fas fa-info-circle"></i> Notifications are permanently enabled for boss spawns
             </div>
-            <!-- <button id="startTimer"><i class="fas fa-play"></i> Start Timer</button> -->
-            <div class="form-row" style="margin-top:15px;gap:10px">
-                <button id="resetForm" class="reset-btn"><i class="fas fa-redo"></i> Reset</button>
-                <button id="clearAll" class="delete-btn"><i class="fas fa-trash"></i> Clear All</button>
-                <button id="exportDataBtn" class="export-btn"><i class="fas fa-download"></i> Download</button>
+            
+            <table class="boss-list">
+                <thead>
+                    <tr>
+                        <th>Boss Name</th>
+                        <th>Date Spawn</th>
+                        <th>Time of Death</th>
+                        <th>Spawn Time</th>
+                        <th>Countdown</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="bossTableBody">
+                    <!-- Boss entries will be added here dynamically -->
+                </tbody>
+            </table>
+
+            <div class="import-export">
+                <button class="btn-export" id="exportData"><i class="fas fa-file-export"></i> Export Data</button>
+                <input type="file" id="importFile" class="file-input" accept=".json">
+                <label for="importFile" class="file-label"><i class="fas fa-file-import"></i> Import Data</label>
             </div>
         </div>
     </div>
 
-    <div id="notification" class="notification"><i class="fas fa-check-circle"></i><span id="notificationText"></span>
+    <div class="toast" id="toast">
+        <i class="fas fa-bell"></i>
+        <span id="toastMessage"></span>
     </div>
 
+    <audio id="notificationSound" src="https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3" preload="auto"></audio>
+
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const bossNameSelect = document.getElementById("bossName"), customBossName = document.getElementById("customBossName"),
-                respawnTimeInput = document.getElementById("respawnTime"), deathDateInput = document.getElementById("deathDate"),
-                deathTimeInput = document.getElementById("deathTime"), bossTableBody = document.getElementById("bossTableBody"),
-                notif = document.getElementById("notification"), notifText = document.getElementById("notificationText");
-            let bosses = JSON.parse(localStorage.getItem("bossTimers")) || [];
-            const defaults = { VIORENT: 10, VENATUS: 10, EGO: 21, LIVERA: 24, ARANEO: 24, UNDOMIEL: 24, "LADY DALIA": 18, GENERAL: 29, BARON: 32, WANNITAS: 48, METUS: 48, SHULIAR: 35, GARETH: 32, TITORE: 37, LARBA: 35, CATENA: 35 };
-            function showNotif(msg, err = false) { notifText.textContent = msg; notif.classList.toggle("error", err); notif.classList.add("show"); setTimeout(() => notif.classList.remove("show"), 3000); }
-            function updateTimers() {
-                if (!bosses.length) { bossTableBody.innerHTML = `<tr class="empty-state"><td colspan="6"><i class="fas fa-clock"></i><p>No bosses tracked</p></td></tr>`; return; }
-                bossTableBody.innerHTML = "";
-                bosses.forEach((b, i) => {
-                    const last = new Date(b.lastKilled), next = new Date(last.getTime() + b.respawnTime * 3600000), remain = next - new Date();
-                    const row = document.createElement("tr");
-                    row.innerHTML = `<td class="boss-name">${b.name}</td>
-      <td>${b.respawnTime}h</td>
-      <td>${last.toLocaleString()}</td>
-      <td>${next.toLocaleString()}</td>
-      <td class="countdown ${remain <= 0 ? "expired" : remain < 3600000 ? "soon" : "normal"}">${remain <= 0 ? "Spawned!" : `${Math.floor(remain / 3600000)}h ${Math.floor(remain / 60000) % 60}m ${Math.floor(remain / 1000) % 60}s`}</td>
-      <td><button class="delete-btn">Delete</button></td>`;
-                    row.querySelector("button").onclick = () => { bosses.splice(i, 1); localStorage.setItem("bossTimers", JSON.stringify(bosses)); updateTimers(); showNotif("Deleted"); };
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set today's date as default
+            const today = new Date();
+            const formattedDate = today.toISOString().split('T')[0];
+            document.getElementById('dateSpawn').value = formattedDate;
+            
+            // Set current time as default (rounded to nearest 5 minutes)
+            const now = new Date();
+            const minutes = Math.round(now.getMinutes() / 5) * 5;
+            const timeString = `${String(now.getHours()).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+            document.getElementById('timeDeath').value = timeString;
+
+            // DOM Elements
+            const bossForm = document.getElementById('bossForm');
+            const bossTableBody = document.getElementById('bossTableBody');
+            const exportButton = document.getElementById('exportData');
+            const importFile = document.getElementById('importFile');
+            const themeToggle = document.getElementById('themeToggle');
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            const notificationSound = document.getElementById('notificationSound');
+            const bossNameSelect = document.getElementById('bossName');
+            const spawnTimeInput = document.getElementById('spawnTime');
+            
+            // State
+            let bosses = JSON.parse(localStorage.getItem('bosses')) || [];
+            let notificationCheckInterval;
+
+            // Initialize
+            renderBossTable();
+            startNotificationChecker();
+
+            // Set spawn time based on selected boss
+            bossNameSelect.addEventListener('change', function() {
+                const selectedOption = bossNameSelect.options[bossNameSelect.selectedIndex];
+                const optionText = selectedOption.text;
+                
+                // Extract spawn time from option text (format: "BOSSNAME (Xh)")
+                const match = optionText.match(/\((\d+)h\)/);
+                if (match) {
+                    spawnTimeInput.value = match[1];
+                }
+            });
+
+            // Theme Toggle
+            themeToggle.addEventListener('click', () => {
+                document.body.classList.toggle('dark-mode');
+                const icon = themeToggle.querySelector('i');
+                if (document.body.classList.contains('dark-mode')) {
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                    localStorage.setItem('theme', 'light');
+                }
+            });
+
+            // Check for saved theme preference
+            if (localStorage.getItem('theme') === 'dark') {
+                document.body.classList.add('dark-mode');
+                const icon = themeToggle.querySelector('i');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            }
+
+            // Form Submission
+            bossForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const boss = {
+                    id: Date.now(),
+                    name: document.getElementById('bossName').value,
+                    dateSpawn: document.getElementById('dateSpawn').value,
+                    timeDeath: document.getElementById('timeDeath').value,
+                    spawnTime: parseInt(document.getElementById('spawnTime').value),
+                    nextSpawn: calculateNextSpawn(
+                        document.getElementById('dateSpawn').value,
+                        document.getElementById('timeDeath').value,
+                        parseInt(document.getElementById('spawnTime').value)
+                    )
+                };
+                
+                bosses.push(boss);
+                saveBosses();
+                renderBossTable();
+                bossForm.reset();
+                
+                // Reset to today's date and current time
+                document.getElementById('dateSpawn').value = formattedDate;
+                document.getElementById('timeDeath').value = timeString;
+            });
+
+            // Export Data
+            exportButton.addEventListener('click', () => {
+                const dataStr = JSON.stringify(bosses);
+                const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                
+                const exportFileDefaultName = 'boss-data.json';
+                
+                const linkElement = document.createElement('a');
+                linkElement.setAttribute('href', dataUri);
+                linkElement.setAttribute('download', exportFileDefaultName);
+                linkElement.click();
+            });
+
+            // Import Data
+            importFile.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const importedData = JSON.parse(e.target.result);
+                        if (Array.isArray(importedData)) {
+                            bosses = importedData;
+                            saveBosses();
+                            renderBossTable();
+                            showToast('Data imported successfully!');
+                        } else {
+                            showToast('Invalid data format', true);
+                        }
+                    } catch (error) {
+                        showToast('Error importing data', true);
+                    }
+                };
+                reader.readAsText(file);
+            });
+
+            // Functions
+            function calculateNextSpawn(date, time, spawnTimeHours) {
+                const deathDateTime = new Date(`${date}T${time}`);
+                return new Date(deathDateTime.getTime() + spawnTimeHours * 3600000).toISOString();
+            }
+
+            function formatCountdown(nextSpawn) {
+                const now = new Date();
+                const spawnDate = new Date(nextSpawn);
+                const diff = spawnDate - now;
+                
+                if (diff <= 0) return "Spawned!";
+                
+                const hours = Math.floor(diff / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                
+                return `${hours}h ${minutes}m`;
+            }
+
+            function renderBossTable() {
+                bossTableBody.innerHTML = '';
+                
+                if (bosses.length === 0) {
+                    bossTableBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No bosses tracked yet</td></tr>';
+                    return;
+                }
+                
+                // Sort bosses by next spawn time (soonest first)
+                bosses.sort((a, b) => new Date(a.nextSpawn) - new Date(b.nextSpawn));
+                
+                bosses.forEach(boss => {
+                    const row = document.createElement('tr');
+                    
+                    const nextSpawn = new Date(boss.nextSpawn);
+                    const isSpawned = nextSpawn <= new Date();
+                    
+                    row.innerHTML = `
+                        <td>${boss.name}</td>
+                        <td>${boss.dateSpawn}</td>
+                        <td>${boss.timeDeath}</td>
+                        <td>${boss.spawnTime} hours</td>
+                        <td class="countdown">${formatCountdown(boss.nextSpawn)}</td>
+                        <td>
+                            <button class="btn-delete" onclick="deleteBoss(${boss.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    
+                    if (isSpawned) {
+                        row.style.backgroundColor = 'rgba(76, 201, 240, 0.2)';
+                    }
+                    
                     bossTableBody.appendChild(row);
                 });
             }
-            bossNameSelect.onchange = () => { if (bossNameSelect.value === "custom") { customBossName.style.display = "block" } else { customBossName.style.display = "none"; respawnTimeInput.value = defaults[bossNameSelect.value] || 10 } };
-            document.getElementById("startTimer").onclick = () => {
-                const name = bossNameSelect.value === "custom" ? customBossName.value.trim() : bossNameSelect.value;
-                if (!name) return showNotif("Enter boss name", true);
-                const resp = parseInt(respawnTimeInput.value); if (!resp) return showNotif("Invalid respawn", true);
-                if (!deathDateInput.value || !deathTimeInput.value) return showNotif("Enter death time", true);
-                const d = new Date(deathDateInput.value + "T" + deathTimeInput.value);
-                bosses.push({ name, respawnTime: resp, lastKilled: d.toISOString() });
-                localStorage.setItem("bossTimers", JSON.stringify(bosses)); updateTimers(); showNotif("Timer added"); resetForm();
-            };
-            function resetForm() { customBossName.value = ""; customBossName.style.display = "none"; bossNameSelect.value = "VIORENT"; respawnTimeInput.value = 10; const n = new Date(); deathDateInput.valueAsDate = n; deathTimeInput.value = n.toTimeString().slice(0, 5); }
-            document.getElementById("resetForm").onclick = resetForm;
-            document.getElementById("clearAll").onclick = () => { if (confirm("Clear all?")) { bosses = []; localStorage.setItem("bossTimers", "[]"); updateTimers(); showNotif("All cleared"); } };
-            document.getElementById("exportDataBtn").onclick = () => { if (!bosses.length) return showNotif("No data", true); const link = document.createElement("a"); link.href = "data:application/json," + encodeURIComponent(JSON.stringify(bosses)); link.download = "boss_timers.json"; link.click(); };
-            document.getElementById("shareLinkBtn").onclick = () => navigator.clipboard.writeText(location.href).then(() => showNotif("Link copied"), () => showNotif("Copy failed", true));
-            
-           // document.getElementById("shareDataBtn").onclick = () => { if (!bosses.length) return showNotif("No data", true); document.getElementById("exportDataInput").value = btoa(JSON.stringify(bosses)); document.getElementById("exportSection").style.display = "block"; showNotif("Copy code below"); };
-            // Export (short string)
-document.getElementById("shareDataBtn").onclick = () => {
-    if (!bosses.length) return showNotif("No data", true);
-    exportDataInput.value = LZString.compressToEncodedURIComponent(JSON.stringify(bosses));
-    exportSection.style.display = "block";
-    showNotif("Copy code below");
-};
 
-// Copy to clipboard
-document.getElementById("copyExportBtn").onclick = () =>
-    navigator.clipboard.writeText(exportDataInput.value)
-        .then(() => showNotif("Copied"))
-        .catch(() => showNotif("Failed", true));
+            function deleteBoss(id) {
+                bosses = bosses.filter(boss => boss.id !== id);
+                saveBosses();
+                renderBossTable();
+            }
 
-// Import (decode back)
-document.getElementById("importBtn").onclick = () => {
-    try {
-        const data = JSON.parse(LZString.decompressFromEncodedURIComponent(importDataInput.value.trim()));
-        if (Array.isArray(data)) {
-            bosses = data;
-            localStorage.setItem("bossTimers", JSON.stringify(bosses));
-            updateTimers();
-            showNotif("Imported");
-        } else {
-            showNotif("Invalid code", true);
-        }
-    } catch (e) {
-        showNotif("Invalid code", true);
+            function saveBosses() {
+                localStorage.setItem('bosses', JSON.stringify(bosses));
+            }
+
+            function showToast(message, isError = false) {
+                if (isError) {
+                    toast.style.backgroundColor = '#f72585';
+                } else {
+                    toast.style.backgroundColor = '#4cc9f0';
+                }
+                
+                toastMessage.textContent = message;
+                toast.classList.add('show');
+                
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 3000);
+            }
+function startNotificationChecker() {
+    // Clear any existing interval
+    if (notificationCheckInterval) {
+        clearInterval(notificationCheckInterval);
     }
-};
-            document.getElementById("copyExportBtn").onclick = () => navigator.clipboard.writeText(document.getElementById("exportDataInput").value).then(() => showNotif("Copied"), () => showNotif("Failed", true));
-            //document.getElementById("importBtn").onclick = () => { try { const data = JSON.parse(atob(document.getElementById("importDataInput").value.trim())); if (Array.isArray(data)) { bosses = data; localStorage.setItem("bossTimers", JSON.stringify(bosses)); updateTimers(); showNotif("Imported"); } } catch (e) { showNotif("Invalid code", true) } };
-            resetForm(); updateTimers(); setInterval(updateTimers, 1000);
+    
+    // Check every 30 seconds
+    notificationCheckInterval = setInterval(() => {
+        const now = new Date();
+        bosses.forEach(boss => {
+            const spawnTime = new Date(boss.nextSpawn);
+            const timeUntilSpawn = spawnTime - now;
+            
+            // Notify if within the next 10 minutes (600000 milliseconds)
+            if (timeUntilSpawn <= 600000 && timeUntilSpawn > 0) {
+                const minutesLeft = Math.ceil(timeUntilSpawn / 60000);
+                
+                // Show countdown notification every minute
+                if (minutesLeft % 1 === 0) {
+                    showToast(`${boss.name} is spawning in ${minutesLeft} minute${minutesLeft !== 1 ? 's' : ''}!`);
+                    
+                    // Only play sound for certain intervals to avoid annoyance
+                    if (minutesLeft === 10 || minutesLeft === 5 || minutesLeft <= 3) {
+                        notificationSound.play();
+                    }
+                }
+            } else if (spawnTime <= now && !boss.notified) {
+                showToast(`${boss.name} has spawned!`);
+                notificationSound.play();
+                boss.notified = true;
+                saveBosses();
+            }
+        });
+    }, 30000); // Check every 30 seconds
+}
+            // Update countdowns every minute
+            setInterval(() => {
+                renderBossTable();
+            }, 60000);
+
+            // Make deleteBoss function available globally
+            window.deleteBoss = deleteBoss;
         });
     </script>
 </body>
-
-
 </html>
