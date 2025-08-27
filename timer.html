@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boss Respawn Timer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/lz-string/libs/lz-string.min.js"></script>
+
+    <style>
+        body {
+            background: #f0f0f0;
+            padding: 20px;
+            color: #202124;
+            font-family: Segoe UI, Roboto, Arial, sans-serif
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, .1);
+            padding: 20px
+        }
+
+        h1 {
+            color: #1a73e8;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #dadce0;
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+
+        .instructions,
+        .sharing-options {
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px
+        }
+
+        .instructions {
+            background: #e8f0fe
+        }
+
+        .sharing-options {
+            background: #e6f4ea
+        }
+
+        .instructions h3,
+        .sharing-options h3 {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px
+        }
+
+        .instructions h3 {
+            color: #1a73e8
+        }
+
+        .sharing-options h3 {
+            color: #0b8043
+        }
+
+        .sharing-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px
+        }
+
+        .share-btn {
+            background: #1a73e8;
+            color: #fff;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px
+        }
+
+        .share-btn:hover {
+            background: #1565c0
+        }
+
+        .share-link {
+            display: flex;
+            margin-top: 10px
+        }
+
+        .share-link input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #dadce0;
+            border-radius: 4px 0 0 4px;
+            font-size: 14px
+        }
+
+        .copy-btn {
+            background: #0b8043;
+            color: #fff;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px
+        }
+
+        th,
+        td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #dadce0
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            position: sticky;
+            top: 0
+        }
+
+        tr:hover {
+            background: #f8f9fa
+        }
+
+        .boss-name {
+            font-weight: 600;
+            color: #1a73e8
+        }
+
+        .countdown {
+            font-weight: 600
+        }
+
+        .expired {
+            color: #d93025
+        }
+
+        .soon {
+            color: #f9ab00
+        }
+
+        .normal {
+            color: #0b8043
+        }
+
+        .form-container {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            margin-top: 20px
+        }
+
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px
+            
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 100px
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            font-size: 16px
+        }
+
+        button {
+            background: #1a73e8;
+            color: #fff;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px
+        }
+
+        button:hover {
+            background: #1565c0
+        }
+
+        .delete-btn {
+            background: #d93025;
+            padding: 8px 12px
+        }
+
+        .delete-btn:hover {
+            background: #b31412
+        }
+
+        .reset-btn {
+            background: #f9ab00
+        }
+
+        .reset-btn:hover {
+            background: #e08e00
+        }
+
+        .export-btn {
+            background: #0b8043
+        }
+
+        .export-btn:hover {
+            background: #096b36
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #5f6368
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: #dadce0
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 6px;
+            background: #0b8043;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateX(100%);
+            transition: .3s;
+            z-index: 1000
+        }
+
+        .notification.show {
+            transform: translateX(0)
+        }
+
+        .notification.error {
+            background: #d93025
+        }
+
+        @media(max-width:768px) {
+            .form-row {
+                flex-direction: column
+            }
+
+            .sharing-buttons {
+                flex-direction: column
+            }
+
+            .share-btn,
+            button {
+                width: 100%;
+                justify-content: center
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1><i class="fas fa-clock"></i> Boss Respawn Timer</h1>
+
+        <div class="instructions">
+            <h3><i class="fas fa-info-circle"></i> How to Use</h3>
+            <p>1. Select a boss or enter a custom name</p>
+            <p>2. Set respawn time (hours)</p>
+            <p>3. Enter death date & time</p>
+            <p>4. Click "Start Timer"</p>
+            <p>5. Timers auto-save in your browser</p>
+        </div>
+
+        <div class="sharing-options">
+            <h3><i class="fas fa-share-alt"></i> Share</h3>
+            <div class="sharing-buttons">
+                <button class="share-btn" id="shareLinkBtn"><i class="fas fa-link"></i> Copy Page Link</button>
+                <button class="share-btn" id="shareDataBtn"><i class="fas fa-code"></i> Export Data</button>
+            </div>
+            <div id="exportSection" style="display:none;margin-top:15px;">
+                <p>Copy this code to share:</p>
+                <div class="share-link">
+                    <input type="text" id="exportDataInput" readonly>
+                    <button class="copy-btn" id="copyExportBtn">Copy</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="sheet-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Boss</th>
+                        <th>Respawn</th>
+                        <th>Death</th>
+                        <th>Next Spawn</th>
+                        <th>Remaining</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="bossTableBody">
+                    <tr class="empty-state">
+                        <td colspan="6"><i class="fas fa-clock"></i>
+                            <p>No bosses tracked</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="form-container">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Boss</label>
+                    <select id="bossName">
+                        <option value="VIORENT">VIORENT (10h)</option>
+                        <option value="VENATUS">VENATUS (10h)</option>
+                        <option value="EGO">EGO (21h)</option>
+                        <option value="LIVERA">LIVERA (24h)</option>
+                        <option value="ARANEO">ARANEO (24h)</option>
+                        <option value="UNDOMIEL">UNDOMIEL (24h)</option>
+                        <option value="LADY DALIA">LADY DALIA (18h)</option>
+                        <option value="GENERAL">GENERAL (29h)</option>
+                        <option value="BARON">BARON (32h)</option>
+                        <option value="WANNITAS">WANNITAS (48h)</option>
+                        <option value="METUS">METUS (48h)</option>
+                        <option value="SHULIAR">SHULIAR (35h)</option>
+                        <option value="GARETH">GARETH (32h)</option>
+                        <option value="TITORE">TITORE (37h)</option>
+                        <option value="LARBA">LARBA (35h)</option>
+                        <option value="CATENA">CATENA (35h)</option>
+                        <option value="custom">Custom</option>
+                    </select>
+                    <input type="text" id="customBossName" placeholder="Custom boss name"
+                        style="display:none;margin-top:10px;">
+                </div>
+                <div class="form-group">
+                    <label>Respawn (hours)</label>
+                    <input type="number" id="respawnTime" value="10" min="1">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group"><label>Date of Death</label><input type="date" id="deathDate"></div>
+                <div class="form-group"><label>Time of Death</label><input type="time" id="deathTime"></div>
+            </div>
+             <button id="startTimer"><i class="fas fa-play"></i> Start Timer</button>
+            <div class="form-row">
+                      <div class="form-group" id="import-group">
+                    <label>Import Data</label>
+                    <input type="text" id="importDataInput" placeholder="Paste code">
+                    <button style="margin-top:10px;" id="importBtn"><i class="fas fa-file-import"></i> Import</button>
+                </div>
+            </div>
+            <!-- <button id="startTimer"><i class="fas fa-play"></i> Start Timer</button> -->
+            <div class="form-row" style="margin-top:15px;gap:10px">
+                <button id="resetForm" class="reset-btn"><i class="fas fa-redo"></i> Reset</button>
+                <button id="clearAll" class="delete-btn"><i class="fas fa-trash"></i> Clear All</button>
+                <button id="exportDataBtn" class="export-btn"><i class="fas fa-download"></i> Download</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="notification" class="notification"><i class="fas fa-check-circle"></i><span id="notificationText"></span>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const bossNameSelect = document.getElementById("bossName"), customBossName = document.getElementById("customBossName"),
+                respawnTimeInput = document.getElementById("respawnTime"), deathDateInput = document.getElementById("deathDate"),
+                deathTimeInput = document.getElementById("deathTime"), bossTableBody = document.getElementById("bossTableBody"),
+                notif = document.getElementById("notification"), notifText = document.getElementById("notificationText");
+            let bosses = JSON.parse(localStorage.getItem("bossTimers")) || [];
+            const defaults = { VIORENT: 10, VENATUS: 10, EGO: 21, LIVERA: 24, ARANEO: 24, UNDOMIEL: 24, "LADY DALIA": 18, GENERAL: 29, BARON: 32, WANNITAS: 48, METUS: 48, SHULIAR: 35, GARETH: 32, TITORE: 37, LARBA: 35, CATENA: 35 };
+            function showNotif(msg, err = false) { notifText.textContent = msg; notif.classList.toggle("error", err); notif.classList.add("show"); setTimeout(() => notif.classList.remove("show"), 3000); }
+            function updateTimers() {
+                if (!bosses.length) { bossTableBody.innerHTML = `<tr class="empty-state"><td colspan="6"><i class="fas fa-clock"></i><p>No bosses tracked</p></td></tr>`; return; }
+                bossTableBody.innerHTML = "";
+                bosses.forEach((b, i) => {
+                    const last = new Date(b.lastKilled), next = new Date(last.getTime() + b.respawnTime * 3600000), remain = next - new Date();
+                    const row = document.createElement("tr");
+                    row.innerHTML = `<td class="boss-name">${b.name}</td>
+      <td>${b.respawnTime}h</td>
+      <td>${last.toLocaleString()}</td>
+      <td>${next.toLocaleString()}</td>
+      <td class="countdown ${remain <= 0 ? "expired" : remain < 3600000 ? "soon" : "normal"}">${remain <= 0 ? "Spawned!" : `${Math.floor(remain / 3600000)}h ${Math.floor(remain / 60000) % 60}m ${Math.floor(remain / 1000) % 60}s`}</td>
+      <td><button class="delete-btn">Delete</button></td>`;
+                    row.querySelector("button").onclick = () => { bosses.splice(i, 1); localStorage.setItem("bossTimers", JSON.stringify(bosses)); updateTimers(); showNotif("Deleted"); };
+                    bossTableBody.appendChild(row);
+                });
+            }
+            bossNameSelect.onchange = () => { if (bossNameSelect.value === "custom") { customBossName.style.display = "block" } else { customBossName.style.display = "none"; respawnTimeInput.value = defaults[bossNameSelect.value] || 10 } };
+            document.getElementById("startTimer").onclick = () => {
+                const name = bossNameSelect.value === "custom" ? customBossName.value.trim() : bossNameSelect.value;
+                if (!name) return showNotif("Enter boss name", true);
+                const resp = parseInt(respawnTimeInput.value); if (!resp) return showNotif("Invalid respawn", true);
+                if (!deathDateInput.value || !deathTimeInput.value) return showNotif("Enter death time", true);
+                const d = new Date(deathDateInput.value + "T" + deathTimeInput.value);
+                bosses.push({ name, respawnTime: resp, lastKilled: d.toISOString() });
+                localStorage.setItem("bossTimers", JSON.stringify(bosses)); updateTimers(); showNotif("Timer added"); resetForm();
+            };
+            function resetForm() { customBossName.value = ""; customBossName.style.display = "none"; bossNameSelect.value = "VIORENT"; respawnTimeInput.value = 10; const n = new Date(); deathDateInput.valueAsDate = n; deathTimeInput.value = n.toTimeString().slice(0, 5); }
+            document.getElementById("resetForm").onclick = resetForm;
+            document.getElementById("clearAll").onclick = () => { if (confirm("Clear all?")) { bosses = []; localStorage.setItem("bossTimers", "[]"); updateTimers(); showNotif("All cleared"); } };
+            document.getElementById("exportDataBtn").onclick = () => { if (!bosses.length) return showNotif("No data", true); const link = document.createElement("a"); link.href = "data:application/json," + encodeURIComponent(JSON.stringify(bosses)); link.download = "boss_timers.json"; link.click(); };
+            document.getElementById("shareLinkBtn").onclick = () => navigator.clipboard.writeText(location.href).then(() => showNotif("Link copied"), () => showNotif("Copy failed", true));
+            
+           // document.getElementById("shareDataBtn").onclick = () => { if (!bosses.length) return showNotif("No data", true); document.getElementById("exportDataInput").value = btoa(JSON.stringify(bosses)); document.getElementById("exportSection").style.display = "block"; showNotif("Copy code below"); };
+            // Export (short string)
+document.getElementById("shareDataBtn").onclick = () => {
+    if (!bosses.length) return showNotif("No data", true);
+    exportDataInput.value = LZString.compressToEncodedURIComponent(JSON.stringify(bosses));
+    exportSection.style.display = "block";
+    showNotif("Copy code below");
+};
+
+// Copy to clipboard
+document.getElementById("copyExportBtn").onclick = () =>
+    navigator.clipboard.writeText(exportDataInput.value)
+        .then(() => showNotif("Copied"))
+        .catch(() => showNotif("Failed", true));
+
+// Import (decode back)
+document.getElementById("importBtn").onclick = () => {
+    try {
+        const data = JSON.parse(LZString.decompressFromEncodedURIComponent(importDataInput.value.trim()));
+        if (Array.isArray(data)) {
+            bosses = data;
+            localStorage.setItem("bossTimers", JSON.stringify(bosses));
+            updateTimers();
+            showNotif("Imported");
+        } else {
+            showNotif("Invalid code", true);
+        }
+    } catch (e) {
+        showNotif("Invalid code", true);
+    }
+};
+            document.getElementById("copyExportBtn").onclick = () => navigator.clipboard.writeText(document.getElementById("exportDataInput").value).then(() => showNotif("Copied"), () => showNotif("Failed", true));
+            //document.getElementById("importBtn").onclick = () => { try { const data = JSON.parse(atob(document.getElementById("importDataInput").value.trim())); if (Array.isArray(data)) { bosses = data; localStorage.setItem("bossTimers", JSON.stringify(bosses)); updateTimers(); showNotif("Imported"); } } catch (e) { showNotif("Invalid code", true) } };
+            resetForm(); updateTimers(); setInterval(updateTimers, 1000);
+        });
+    </script>
+</body>
+
+</html>
