@@ -618,6 +618,26 @@ function startNotificationChecker() {
             // Make deleteBoss function available globally
             window.deleteBoss = deleteBoss;
         });
+document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+});
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'F12' || 
+        (e.ctrlKey && e.shiftKey && e.key === 'I') || 
+        (e.ctrlKey && e.shiftKey && e.key === 'C') ||
+        (e.ctrlKey && e.key === 'U')) {
+        e.preventDefault();
+    }
+});
+setInterval(function() {
+    const startTime = performance.now();
+    debugger;
+    const endTime = performance.now();
+    if (endTime - startTime > 100) {
+        window.location.reload();
+    }
+}, 1000);
     </script>
 </body>
 </html>
+
